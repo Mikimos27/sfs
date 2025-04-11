@@ -4,7 +4,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 
-struct Server{
+typedef struct Server{
     int domain;
     int service;
     int protocol;
@@ -19,8 +19,7 @@ struct Server{
     void (*net)(struct Server*, const char*);
     void (*launch)(struct Server*);
 
-};
-typedef struct Server Server;
+} Server;
 Server server_init(int, int, int, unsigned long, int, int, void (*)(Server*));
 Server client_init(int, int, int, unsigned long, int, int, void (*)(Server*, const char*), void (*)(Server*));
 
