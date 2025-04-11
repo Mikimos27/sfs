@@ -1,4 +1,4 @@
-#include "server.h"
+#include "../hdr/server.h"
 #include <stdio.h>
 #include <stdio.h>
 #include <unistd.h>
