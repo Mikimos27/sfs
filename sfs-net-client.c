@@ -11,8 +11,8 @@
 #define BLOG 10
 #define TIMEOUT 1000
 
-void net(Server* client){
-    if(inet_pton(client->domain, "127.0.0.1", &client->address.sin_addr) <= 0){
+void net(Server* client, const char* addr){
+    if(inet_pton(client->domain, addr, &client->address.sin_addr) <= 0){
         perror("Failed net connection...");
         exit(1);
     }
@@ -45,7 +45,7 @@ void launch(Server* client){
 int main(){
     Server client = client_init(AF_INET, SOCK_STREAM, 0, INADDR_ANY, PORT, 1, net, launch);
 
-    client.net(&client);
+    client.net(&client, "127.0.0.1");
     client.launch(&client);
 
     return 0;

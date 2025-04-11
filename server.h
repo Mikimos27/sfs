@@ -16,12 +16,12 @@ struct Server{
 
     struct sockaddr_in address;
 
-    void (*net)(struct Server*);
+    void (*net)(struct Server*, const char*);
     void (*launch)(struct Server*);
 
 };
 typedef struct Server Server;
 Server server_init(int, int, int, unsigned long, int, int, void (*)(Server*));
-Server client_init(int, int, int, unsigned long, int, int, void (*)(Server*), void (*)(Server*));
+Server client_init(int, int, int, unsigned long, int, int, void (*)(Server*, const char*), void (*)(Server*));
 
 #endif
