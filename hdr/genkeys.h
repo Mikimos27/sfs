@@ -1,5 +1,5 @@
-#ifndef KEY_GEN
-#define KEY_GEN
+#ifndef KEYGEN_H
+#define KEYGEN_H
 
 
 void gen
