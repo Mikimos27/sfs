@@ -1,16 +1,38 @@
-#include "../hdr/server.h"
+#include "../hdr/connection.h"
 #include <stdio.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
 #include <poll.h>
+#include <stdlib.h>
 
 #define B_MAX 3000
 #define PORT 5050
 #define BLOG 10
 #define TIMEOUT 1000
 
-void launch(Server* server){
+
+void net(Connection* server, const char* addr){
+    
+    if(server->socket < 0){
+        perror("Failed to connect...");
+        exit(1);
+    }
+    if(bind(server->socket, (struct sockaddr*)&server->address,
+                sizeof(server->address)) < 0){
+        perror("Failed to bind...");
+        exit(1);
+    }
+
+    if(listen(server->socket, server->backlog) < 0){
+        perror("Failed to listen...");
+        exit(1);
+    }
+
+}
+
+
+void launch(Connection* server){
 
     int clientfd = accept(server->socket, 0, 0);
 
@@ -36,7 +58,8 @@ void launch(Server* server){
 
 
 int main(){
-    Server server = server_init(AF_INET, SOCK_STREAM, 0, INADDR_ANY, PORT, BLOG, launch);
+    Connection server = con_init(AF_INET, SOCK_STREAM, 0, INADDR_ANY, PORT, BLOG, net, launch);
+    server.net(&server, 0);
     server.launch(&server);
     return 0;
 }
