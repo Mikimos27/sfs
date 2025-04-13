@@ -1,11 +1,11 @@
 #include "../hdr/connection.h"
+#include "../hdr/convinience.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <poll.h>
 #include <string.h>
 #include <arpa/inet.h>
-#include "convinience.c"
 
 #define B_MAX 3000
 #define PORT 5050
