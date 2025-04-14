@@ -15,17 +15,17 @@
 void net(Connection* server, const char* addr){
     
     if(server->socket < 0){
-        perror("Failed to connect...");
+        perror("Failed to connect...\n");
         exit(1);
     }
     if(bind(server->socket, (struct sockaddr*)&server->address,
                 sizeof(server->address)) < 0){
-        perror("Failed to bind...");
+        perror("Failed to bind...\n");
         exit(1);
     }
 
     if(listen(server->socket, server->backlog) < 0){
-        perror("Failed to listen...");
+        perror("Failed to listen...\n");
         exit(1);
     }
 

@@ -16,7 +16,7 @@
 
 void net(Connection* client, const char* addr){
     if(inet_pton(client->domain, addr, &client->address.sin_addr) <= 0){
-        perror("Failed net connection...");
+        perror("Failed net connection...\n");
         exit(1);
     }
     client->interface = inet_addr(addr);
@@ -25,7 +25,7 @@ void net(Connection* client, const char* addr){
 void launch(Connection* client){
 
     if(connect(client->socket, (struct sockaddr*)&client->address, sizeof(client->address)) < 0){
-        perror("Failed to connect to server...");
+        perror("Failed to connect to server...\n");
         exit(1);
     } 
 
