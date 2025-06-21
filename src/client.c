@@ -1,9 +1,10 @@
 #include "../hdr/connection.h"
 #include "../hdr/convinience.h"
+//#include "../hdr/getch.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <poll.h>
+#include <fcntl.h>
 #include <string.h>
 #include <arpa/inet.h>
 
@@ -29,20 +30,31 @@ void launch(Connection* client){
         exit(1);
     } 
 
-    struct pollfd fds[1] = { { 0, POLLIN, 0} };
+    
+}
 
-    while(1){
+void manage(Connection* client, const char* filepath){
+    char buffer[B_MAX] = { 0 };
 
-        char buffer[B_MAX] = { 0 };
-
-        poll(fds, 1, TIMEOUT);
-
-        if(fds[0].revents & POLLIN){
-            read(0, buffer, B_MAX - 1); //TODO - close socket or make proper exit 
-            send(client->socket, buffer, B_MAX - 1, 0);
-        }
+    FILE* file = fopen(filepath, "r");
+    if(file == NULL){
+        perror("BAD FILE PATH\n");
+        return;
     }
+    size_t chars_read = 0;
+    while((chars_read = fread(buffer, sizeof(char), B_MAX - 1, file)) > 0){
+        buffer[chars_read] = 0;
+        //TODO - close socket or make proper exit 
+        fprintf(stdout, buffer, B_MAX - 1);
+        send(client->socket, buffer, B_MAX - 1, 0);
+        zero_arr(buffer, B_MAX);
+    }
+    fclose(file);
 
+}
+
+void clean(Connection* client){
+    close(client->socket);
 }
 
 
@@ -79,10 +91,12 @@ int main(int argc, char** argv){
         exit(1);
     }
 
-    Connection client = con_init(AF_INET, SOCK_STREAM, 0, INADDR_ANY, PORT, 1, net, launch);
+    Connection client = con_init(AF_INET, SOCK_STREAM, 0, INADDR_ANY, PORT, 1);
 
-    client.net(&client, argv[1]);
-    client.launch(&client);
+    net(&client, argv[1]);
+    launch(&client);
+    manage(&client, argv[2]);
+    clean(&client);
 
     return 0;
 }

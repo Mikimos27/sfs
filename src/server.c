@@ -1,5 +1,5 @@
 #include "../hdr/connection.h"
-#include <stdio.h>
+#include "../hdr/convinience.h"
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
@@ -11,6 +11,7 @@
 #define BLOG 10
 #define TIMEOUT 1000
 
+char** filepath;
 
 void net(Connection* server, const char* addr){
     
@@ -31,35 +32,40 @@ void net(Connection* server, const char* addr){
 
 }
 
-
 void launch(Connection* server){
+    char buffer[B_MAX] = { 0 };
 
     int clientfd = accept(server->socket, 0, 0);
-
-    struct pollfd fds[1] = { { clientfd, POLLIN, 0} };
-
-    while(1){
-        
-        char buffer[B_MAX] = { 0 };
-
-        poll(fds, 1, TIMEOUT);
-
-        if(fds[0].revents & POLLIN){
-            if(recv(clientfd, buffer, B_MAX - 1, 0) == 0){
-                close(clientfd);
-                return;
-            }
-            printf("%s", buffer);
-        }
-
+    FILE* file = fopen(*filepath, "w");
+    if(file == NULL){
+        perror("CANT OPEN FILE\n");
+        return;
     }
+    while(recv(clientfd, buffer, B_MAX - 1, 0) != 0){
+        fprintf(file, buffer, B_MAX - 1);
+        zero_arr(buffer, B_MAX);
+    }
+
+    close(clientfd);
+
+}
+
+void clean(Connection* server){
+    close(server->socket);
 }
 
 
+int main(int argc, char** argv){
+    if(argc < 2){
+        perror("GIVE FILEPATH\n");
+        exit(1);
+    }
+    Connection server = con_init(AF_INET, SOCK_STREAM, 0, INADDR_ANY, PORT, BLOG);
+    
 
-int main(){
-    Connection server = con_init(AF_INET, SOCK_STREAM, 0, INADDR_ANY, PORT, BLOG, net, launch);
-    server.net(&server, 0);
-    server.launch(&server);
+    filepath = &argv[1];
+    net(&server, 0);
+    launch(&server);
+    clean(&server);
     return 0;
 }
