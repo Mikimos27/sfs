@@ -46,7 +46,7 @@ void launch(Connection* server, const char* filepath){
     }
     while(recv(clientfd, buffer, B_MAX - 1, 0) != 0){
         buffer[B_MAX - 1]  = 0;
-        fprintf(file, buffer, B_MAX - 1); //TODO - change to use fwrite()
+        fwrite(buffer, sizeof(char), strlen(buffer), file);
     }
 
     fclose(file);
