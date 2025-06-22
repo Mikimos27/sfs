@@ -15,3 +15,25 @@ void zero_arr(char* c, size_t size){
         c[0] = 0;
     }
 }
+
+//int addr_validation(const char* str){
+//    int block_counts[4] = {0};
+//    int dot_num = 0;
+//    int addrlen = strlen(str);
+//
+//    for(int i = 0; i < addrlen; i++){
+//        if(str[i] == '.') { 
+//            dot_num++;
+//            continue;
+//        }
+//        if(str[0] < '0' || str[i] > '9') return 1;
+//        if(dot_num > 3) return 1;
+//        block_counts[dot_num]++;
+//    }
+//
+//    for(int i = 0; i < 4; i++){
+//        if(block_counts[i] == 0 || block_counts[i] > 3) return 1;
+//    }
+//    if(dot_num > 3) return 1;
+//    return 0;
+//}
