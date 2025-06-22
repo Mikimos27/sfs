@@ -12,26 +12,23 @@
 #define TIMEOUT 1000
 
 
-void clean(Connection*);
-
-
 void net(Connection* server, const char* addr){
     
     if(server->socket < 0){
         perror("Failed to connect...\n");
-        clean(server);
+        close(server->socket);
         exit(1);
     }
     if(bind(server->socket, (struct sockaddr*)&server->address,
                 sizeof(server->address)) < 0){
         perror("Failed to bind...\n");
-        clean(server);
+        close(server->socket);
         exit(1);
     }
 
     if(listen(server->socket, server->backlog) < 0){
-        clean(server);
         perror("Failed to listen...\n");
+        close(server->socket);
         exit(1);
     }
 
@@ -48,17 +45,13 @@ void launch(Connection* server, const char* filepath){
         return;
     }
     while(recv(clientfd, buffer, B_MAX - 1, 0) != 0){
-        fprintf(file, buffer, B_MAX - 1);
+        fprintf(file, buffer, B_MAX - 1); //TODO - change to use fwrite()
         zero_arr(buffer, B_MAX);
     }
 
     fclose(file);
     close(clientfd);
 
-}
-
-void clean(Connection* server){
-    close(server->socket);
 }
 
 
@@ -72,6 +65,6 @@ int main(int argc, char** argv){
 
     net(&server, 0);
     launch(&server, argv[1]);
-    clean(&server);
+    close(server.socket);
     return 0;
 }

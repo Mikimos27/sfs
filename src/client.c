@@ -15,13 +15,10 @@
 #define MAX_ADDRLEN 15
 
 
-void clean(Connection*);
-
-
 void net(Connection* client, const char* addr){
     if(inet_pton(client->domain, addr, &client->address.sin_addr) <= 0){
         perror("Failed net connection...\n");
-        clean(client);
+        close(client->socket);
         exit(1);
     }
     client->interface = inet_addr(addr);
@@ -31,7 +28,7 @@ void launch(Connection* client){
 
     if(connect(client->socket, (struct sockaddr*)&client->address, sizeof(client->address)) < 0){
         perror("Failed to connect to server...\n");
-        clean(client);
+        close(client->socket);
         exit(1);
     } 
 
@@ -44,7 +41,8 @@ void manage(Connection* client, const char* filepath){
     FILE* file = fopen(filepath, "r");
     if(file == NULL){
         perror("BAD FILE PATH\n");
-        return;
+        close(client->socket);
+        exit(1);
     }
     size_t chars_read = 0;
     while((chars_read = fread(buffer, sizeof(char), B_MAX - 1, file)) > 0){
@@ -54,10 +52,6 @@ void manage(Connection* client, const char* filepath){
     }
     fclose(file);
 
-}
-
-void clean(Connection* client){
-    close(client->socket);
 }
 
 
@@ -104,7 +98,7 @@ int main(int argc, char** argv){
     net(&client, argv[1]);
     launch(&client);
     manage(&client, argv[2]);
-    clean(&client);
+    close(client.socket);
 
     return 0;
 }
