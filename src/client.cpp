@@ -68,7 +68,6 @@ private:
         while((chars_read = fread(buffer, sizeof(char), B_MAX - 1, file)) > 0){
             buffer[chars_read] = 0;
             send(con.sock, buffer, B_MAX - 1, 0);
-            zero_arr(buffer, B_MAX);
         }
         fclose(file);
         return 1;
