@@ -1,5 +1,5 @@
 #!/bin/bash
 
-gcc src/server.c src/connection.c -o server.elf -Wall -Werror
-gcc src/client.c src/connection.c -o client.elf -Wall -Werror
+g++ src/server.cpp src/connection.cpp -o server.elf -Wall -Werror
+g++ src/client.cpp src/connection.cpp -o client.elf -Wall -Werror
 

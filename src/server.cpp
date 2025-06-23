@@ -57,14 +57,26 @@ void launch(Connection* server, const char* filepath){
 
 int main(int argc, char** argv){
     if(argc < 2){
-        perror("GIVE FILEPATH\n");
+        perror("No filepath given");
         exit(1);
     }
-    Connection server = con_init(AF_INET, SOCK_STREAM, 0, INADDR_ANY, PORT, BLOG);
+    if(argc < 3){
+        perror("No port given\n");
+        exit(1);
+    }
+    char* filepath = argv[1];
+    int port = atoi(argv[2]);
+
+    if(port < 0){
+        perror("Invalid port input\n");
+        exit(1);
+    }
+
+    Connection server = con_init(AF_INET, SOCK_STREAM, 0, INADDR_ANY, port, BLOG);
     
 
     net(&server, 0);
-    launch(&server, argv[1]);
+    launch(&server, filepath);
     close(server.socket);
     return 0;
 }
