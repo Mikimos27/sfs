@@ -1,24 +1,25 @@
 #include "../hdr/connection.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 
-Connection con_init(int domain, int service, int protocol, unsigned long interface, int port, int backlog){
-    
-    Connection con;
-    con.domain = domain;
-    con.service = service;
-    con.protocol = protocol;
-    con.interface = interface;
-    con.port = port;
-    con.backlog = backlog;
+Connection::Connection (int domain, int service, int protocol, unsigned long interface, int port, int backlog){
+    this->domain = domain;
+    this->service = service;
+    this->protocol = protocol;
+    this->interface = interface;
+    this->port = port;
+    this->backlog = backlog;
 
 
-    con.address.sin_family = domain;
-    con.address.sin_port = htons(port);
-    con.address.sin_addr.s_addr = htonl(interface);
+    this->address.sin_family = domain;
+    this->address.sin_port = htons(port);
+    this->address.sin_addr.s_addr = htonl(interface);
 
-    con.socket = socket(domain, service, protocol);
-
-    return con;
+    this->sock = socket(domain, service, protocol);
 }
 
+Connection::~Connection(){
+    shutdown(this->sock, SHUT_RDWR);
+    close(this->sock);
+}

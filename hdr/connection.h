@@ -4,7 +4,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 
-typedef struct Connection{
+struct Connection{
     int domain;
     int service;
     int protocol;
@@ -12,12 +12,12 @@ typedef struct Connection{
     int port;
     int backlog;
 
-    int socket;
+    int sock;
 
     struct sockaddr_in address;
 
-
-} Connection;
-Connection con_init(int, int, int, unsigned long, int, int);
+    Connection(int, int, int, unsigned long, int, int);
+    ~Connection();
+};
 
 #endif
