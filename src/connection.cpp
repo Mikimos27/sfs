@@ -20,6 +20,7 @@ Connection::Connection (int domain, int service, int protocol, unsigned long int
 }
 
 Connection::~Connection(){
+    printf("Closed connection\n");
     shutdown(this->sock, SHUT_RDWR);
     close(this->sock);
 }

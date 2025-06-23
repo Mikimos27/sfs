@@ -25,7 +25,7 @@ public:
 
    
     ~Client(){
-
+        printf("Client closed\n");
     }
     
 
