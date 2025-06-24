@@ -59,7 +59,7 @@ private:
     int manage(){
         char buffer[B_MAX] = { 0 };
         
-        std::fstream file(filepath, std::ios::in);
+        std::fstream file(filepath, std::ios::in | std::ios::binary);
         if(!file){
             std::cerr << "BAD FILE PATH\n";
             return -1;

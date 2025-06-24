@@ -56,7 +56,7 @@ private:
         clientfd = accept(con.sock, 0, 0);//socket.h
 
 
-        std::fstream file(filepath, std::ios::out);
+        std::fstream file(filepath, std::ios::out | std::ios::binary);
         if(!file){
             std::cerr << "CANT OPEN FILE\n";
             close(clientfd);
