@@ -62,9 +62,10 @@ private:
             close(clientfd);
             return -1;
         }
-        while(recv(clientfd, buffer, B_MAX - 1, 0) != 0){
-            buffer[B_MAX - 1] = 0;
-            file.write(buffer, B_MAX - 1); //cstring
+        size_t rec_s = 0;
+        while((rec_s = recv(clientfd, buffer, B_MAX - 1, 0)) > 0){
+            buffer[rec_s] = 0;
+            file.write(buffer, rec_s);
             zero_arr(buffer, B_MAX);
         }
 

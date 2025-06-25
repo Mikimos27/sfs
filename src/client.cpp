@@ -1,7 +1,8 @@
 #include "../hdr/connection.h"
 #include "../hdr/convinience.h"
-#include <stdio.h>
-#include <stdlib.h>
+
+#include <cstdio>
+#include <cstdlib>
 
 
 #include <arpa/inet.h>
@@ -9,7 +10,6 @@
 
 #include <string>
 #include <iostream>
-#include <fstream>
 
 
 #define B_MAX 3000
@@ -59,16 +59,19 @@ private:
     int manage(){
         char buffer[B_MAX] = { 0 };
         
-        std::fstream file(filepath, std::ios::in | std::ios::binary);
-        if(!file){
+        std::FILE* file = std::fopen(filepath.c_str(), "rb");
+        if(file == NULL){
             std::cerr << "BAD FILE PATH\n";
             return -1;
         }
-        while(file){
-            file.read(buffer, B_MAX - 1);
-            send(con.sock, buffer, B_MAX - 1, 0);
+        size_t chars_read = 0;
+        
+        while((chars_read = std::fread(buffer, sizeof(char), B_MAX, file)) > 0){
+            send(con.sock, buffer, chars_read, 0);
             zero_arr(buffer, B_MAX);
+            chars_read = 0;
         }
+        std::fclose(file);
 
         return 1;
     }
