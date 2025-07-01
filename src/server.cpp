@@ -34,16 +34,16 @@ private:
 
     int net(){
         if(con.sock < 0){
-            std::cerr << "Failed to connect...\n";
+            std::cerr << "Failed to create socket\n";
             return -1;
         }
         if(bind(con.sock, (sockaddr*)&con.address, sizeof(con.address)) < 0){//socket.h
-            std::cerr << "Failed to bind...\n";
+            std::cerr << "Failed to bind\n";
             return -1;
         }
 
         if(listen(con.sock, con.backlog) < 0){//socket.h
-            std::cerr << "Failed to listen...\n";
+            std::cerr << "Failed to listen\n";
             return -1;
         }
 
@@ -53,23 +53,21 @@ private:
     int launch(){
         char buffer[B_MAX] = { 0 };
 
-        clientfd = accept(con.sock, 0, 0);//socket.h
-
+        if((clientfd = accept(con.sock, 0, 0)) < 0){//socket.h
+            std::cerr << "Failed to accept connection\n";
+            return -1;
+        }
 
         std::fstream file(filepath, std::ios::out | std::ios::binary);
         if(!file){
-            std::cerr << "CANT OPEN FILE\n";
-            close(clientfd);
+            std::cerr << "Can't open file\n";
             return -1;
         }
         size_t rec_s = 0;
-        while((rec_s = recv(clientfd, buffer, B_MAX - 1, 0)) > 0){
-            buffer[rec_s] = 0;
+        while((rec_s = recv(clientfd, buffer, B_MAX, 0)) > 0){
             file.write(buffer, rec_s);
             zero_arr(buffer, B_MAX);
         }
-
-        close(clientfd);
 
         return 1;
     }
@@ -86,19 +84,48 @@ private:
 
 
 int main(int argc, char** argv){
-    if(argc < 2){
-        std::cerr << "No filepath given";
-        return 1;
-    }
-    if(argc < 3){
-        std::cerr << "No port given\n";
-        return 1;
-    }
-    char* filepath = argv[1];
-    int port = std::stoi(argv[2]);
+    int c = 0;
+    int port = 0;
+    char* filepath = NULL;
 
-    if(port < 0){
-        std::cerr << "Invalid port input\n";
+    opterr = 0;
+    while ((c = getopt (argc, argv, "f:p:")) != -1){
+        switch (c){
+            case 'p':
+                try{
+                    port = std::stoi(optarg);
+                }
+                catch(...){
+                    std::cerr <<  "Given port is NAN\n";
+                    return 1;
+                }
+                break;
+            case 'f':
+                filepath = optarg;
+                break;
+            case '?':
+                if (optopt == 'p' || optopt == 'f')
+                    std::cerr << "Option -" << optopt << " requires an argument.\n";
+                else if (isprint (optopt))
+                    std::cerr << "Unknown option '-" << (char)optopt << "'.\n";
+                else 
+            std::cerr << "Unknown option character '" << optopt << "'.\n";
+                return 1;
+            default:
+                return 1;
+        }
+    }
+    int failed = 0;
+    if(filepath == NULL){
+        std::cerr << "No filepath given\n";
+        failed = 1;
+    }
+    if(port <= 0){
+        std::cerr << "Bad port\n";
+        failed = 1;
+    }
+    if(failed == 1){
+        std::cerr << "Use: client.elf [-p port] [-f filepath]\n";
         return 1;
     }
 
