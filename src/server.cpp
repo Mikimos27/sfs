@@ -1,13 +1,13 @@
 #include "../hdr/connection.h"
 #include "../hdr/convinience.h"
 
+#include <cstdio>
 #include <cstring>
 
 #include <unistd.h>
 
 #include <string>
 #include <iostream>
-#include <fstream>
 
 #define B_MAX 3000
 #define PORT 5050
@@ -51,23 +51,24 @@ private:
     }
 
     int launch(){
-        char buffer[B_MAX] = { 0 };
+        unsigned char buffer[B_MAX] = { 0 };
 
         if((clientfd = accept(con.sock, 0, 0)) < 0){//socket.h
             std::cerr << "Failed to accept connection\n";
             return -1;
         }
 
-        std::fstream file(filepath, std::ios::out | std::ios::binary);
+        std::FILE* file = std::fopen(filepath.c_str(), "wb");
         if(!file){
             std::cerr << "Can't open file\n";
             return -1;
         }
         size_t rec_s = 0;
         while((rec_s = recv(clientfd, buffer, B_MAX, 0)) > 0){
-            file.write(buffer, rec_s);
+            std::fwrite(buffer, sizeof(unsigned char), rec_s, file);
             zero_arr(buffer, B_MAX);
         }
+        std::fclose(file);
 
         return 1;
     }

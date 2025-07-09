@@ -58,7 +58,7 @@ private:
 
 
     int manage(){
-        char buffer[B_MAX] = { 0 };
+        unsigned char buffer[B_MAX] = { 0 };
 
         std::FILE* file = std::fopen(filepath.c_str(), "rb");
         if(file == NULL){
@@ -67,7 +67,7 @@ private:
         }
         size_t chars_read = 0;
 
-        while((chars_read = std::fread(buffer, sizeof(char), B_MAX, file)) > 0){
+        while((chars_read = std::fread(buffer, sizeof(unsigned char), B_MAX, file)) > 0){
             send(con.sock, buffer, chars_read, 0);
             zero_arr(buffer, B_MAX);
             chars_read = 0;
