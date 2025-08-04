@@ -10,7 +10,9 @@
 #include <iostream>
 
 #define B_MAX 3000
-#define PORT 5050
+//Recomended port:
+#define PORT 15050
+//////////////////
 #define BLOG 10
 #define TIMEOUT 1000
 
