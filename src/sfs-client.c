@@ -1,4 +1,4 @@
-#include "../hdr/server.h"
+#include "../hdr/connection.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -11,14 +11,15 @@
 #define BLOG 10
 #define TIMEOUT 1000
 
-void net(Server* client, const char* addr){
+void net(Connection* client, const char* addr){
     if(inet_pton(client->domain, addr, &client->address.sin_addr) <= 0){
         perror("Failed net connection...");
         exit(1);
     }
+    client->interface = 0;
 }
 
-void launch(Server* client){
+void launch(Connection* client){
 
     if(connect(client->socket, (struct sockaddr*)&client->address, sizeof(client->address)) < 0){
         perror("Failed to connect to server...");
@@ -43,7 +44,7 @@ void launch(Server* client){
 
 
 int main(){
-    Server client = client_init(AF_INET, SOCK_STREAM, 0, INADDR_ANY, PORT, 1, net, launch);
+    Connection client = con_init(AF_INET, SOCK_STREAM, 0, INADDR_ANY, PORT, 1, net, launch);
 
     client.net(&client, "127.0.0.1");
     client.launch(&client);

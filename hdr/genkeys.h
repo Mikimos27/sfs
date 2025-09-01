@@ -2,7 +2,7 @@
 #define KEYGEN_H
 
 
-void gen
+void genkeypair(
 
 
 #endif
