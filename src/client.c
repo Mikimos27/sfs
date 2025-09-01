@@ -9,7 +9,6 @@
 #include <arpa/inet.h>
 
 #define B_MAX 3000
-#define PORT 5050
 #define BLOG 10
 #define TIMEOUT 1000
 #define MAX_ADDRLEN 15
@@ -17,23 +16,22 @@
 
 void net(Connection* client, const char* addr){
     if(inet_pton(client->domain, addr, &client->address.sin_addr) <= 0){
-        perror("Failed net connection...\n");
+        perror("Bad address given\n");
         close(client->socket);
         exit(1);
     }
     client->interface = inet_addr(addr);
 }
 
-void launch(Connection* client){
 
+void launch(Connection* client){
     if(connect(client->socket, (struct sockaddr*)&client->address, sizeof(client->address)) < 0){
-        perror("Failed to connect to server...\n");
+        perror("Failed to connect to server\nCheck if port number is correct and if server is running\n");
         close(client->socket);
         exit(1);
     } 
-
-    
 }
+
 
 void manage(Connection* client, const char* filepath){
     char buffer[B_MAX] = { 0 };
@@ -51,53 +49,38 @@ void manage(Connection* client, const char* filepath){
         zero_arr(buffer, B_MAX);
     }
     fclose(file);
-
 }
-
-
-
-int addr_validation(const char* str){
-    int block_counts[4] = {0};
-    int dot_num = 0;
-    int addrlen = strlen(str);
-
-    for(int i = 0; i < addrlen; i++){
-        if(str[i] == '.') { 
-            dot_num++;
-            continue;
-        }
-        if(str[0] < '0' || str[i] > '9') return 1;
-        if(dot_num > 3) return 1;
-        block_counts[dot_num]++;
-    }
-
-    for(int i = 0; i < 4; i++){
-        if(block_counts[i] == 0 || block_counts[i] > 3) return 1;
-    }
-    if(dot_num > 3) return 1;
-    return 0;
-}
-
-
-
 
 
 
 int main(int argc, char** argv){
     if(argc < 2) {
-        printf("No address given\n");
+        perror("No address given\n");
         exit(1);
     }
-    if(addr_validation(argv[1])){
-        printf("Bad address\n");
+    if(argc < 3){
+        perror("No filepath given\n");
         exit(1);
     }
+    if(argc < 4){
+        perror("No port given\n");
+        exit(1);
+    }
+    
+    char* address = argv[1];
+    char* filepath = argv[2];
+    int port = atoi(argv[3]);
 
-    Connection client = con_init(AF_INET, SOCK_STREAM, 0, INADDR_ANY, PORT, 1);
+    if(port < 0){
+        perror("Invalid port input\n");
+        exit(1);
+    }
+    
+    Connection client = con_init(AF_INET, SOCK_STREAM, 0, INADDR_ANY, port, 1);
 
-    net(&client, argv[1]);
+    net(&client, address);
     launch(&client);
-    manage(&client, argv[2]);
+    manage(&client, filepath);
     close(client.socket);
 
     return 0;
