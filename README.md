@@ -1,2 +1,2 @@
-File transfer server-client \n
+File transfer server-client \
 use build.sh
