@@ -5,6 +5,7 @@
 #include <cstdlib>
 
 
+#include <unistd.h>
 #include <arpa/inet.h>
 
 
@@ -22,13 +23,13 @@
 class Client{
 public:
     Client(int domain, int service, int protocol, unsigned long interface, int port, int backlog, std::string address, std::string filepath)
-        : con(domain, service, protocol, interface, port, backlog), address(address), filepath(filepath) {}
+    : con(domain, service, protocol, interface, port, backlog), address(address), filepath(filepath) {}
 
-   
+
     ~Client(){
         std::cout << "Client closed\n";
     }
-    
+
 
     void Start(){
         if(net() < 0) return;
@@ -58,14 +59,14 @@ private:
 
     int manage(){
         char buffer[B_MAX] = { 0 };
-        
+
         std::FILE* file = std::fopen(filepath.c_str(), "rb");
         if(file == NULL){
             std::cerr << "BAD FILE PATH\n";
             return -1;
         }
         size_t chars_read = 0;
-        
+
         while((chars_read = std::fread(buffer, sizeof(char), B_MAX, file)) > 0){
             send(con.sock, buffer, chars_read, 0);
             zero_arr(buffer, B_MAX);
@@ -88,29 +89,58 @@ private:
 
 
 int main(int argc, char** argv){
-    if(argc < 2) {
+    int c = 0;
+    int port = 0;
+    char* filepath = NULL;
+    char* address = NULL;
+
+    opterr = 0;
+    while ((c = getopt (argc, argv, "a:f:p:")) != -1){
+        switch (c){
+            case 'p':
+                try{
+                    port = std::stoi(optarg);
+                }
+                catch(...){
+                    std::cerr <<  "Given port is NAN\n";
+                    return 1;
+                }
+                break;
+            case 'a':
+                address = optarg;
+                break;
+            case 'f':
+                filepath = optarg;
+                break;
+            case '?':
+                if (optopt == 'p' || optopt == 'a' || optopt == 'f')
+                    std::cerr << "Option -" << optopt << " requires an argument.\n";
+                else if (isprint (optopt))
+                    std::cerr << "Unknown option '-" << (char)optopt << "'.\n";
+                else 
+            std::cerr << "Unknown option character '" << optopt << "'.\n";
+                return 1;
+            default:
+                return 1;
+        }
+    }
+    int failed = 0;
+    if(address == NULL){
         std::cerr << "No address given\n";
-        return 1;
+        failed = 1;
     }
-    if(argc < 3){
+    if(filepath == NULL){
         std::cerr << "No filepath given\n";
+        failed = 1;
+    }
+    if(port <= 0){
+        std::cerr << "Bad port\n";
+        failed = 1;
+    }
+    if(failed == 1){
+        std::cerr << "Use: client.elf [-p port] [-a address] [-f filepath]\n";
         return 1;
     }
-    if(argc < 4){
-        std::cerr << "No port given\n";
-        return 1;
-    }
-
-    char* address = argv[1];
-    char* filepath = argv[2];
-    int port = atoi(argv[3]);
-
-    if(port < 0){
-        std::cerr << "Invalid port input\n";
-        return 1;
-    }
-
-
 
 
     Client client(AF_INET, SOCK_STREAM, 0, INADDR_ANY, port, 1, address, filepath);
