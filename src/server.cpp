@@ -1,12 +1,13 @@
 #include "../hdr/connection.h"
 #include "../hdr/convinience.h"
-#include <stdio.h>
-#include <unistd.h>
+
 #include <cstring>
-//#include <poll.h>
-#include <stdlib.h>
+
+#include <unistd.h>
 
 #include <string>
+#include <iostream>
+#include <fstream>
 
 #define B_MAX 3000
 #define PORT 5050
@@ -19,9 +20,9 @@ public:
     Server(int domain, int service, int protocol, unsigned long interface, int port, int backlog, std::string filepath)
         :   con(domain, service, protocol, interface, port, backlog), filepath(filepath), clientfd(0) {}
     ~Server(){
-        printf("Server closed\n");
-        shutdown(clientfd, SHUT_RDWR);
-        close(clientfd);
+        std::cout << "Server closed\n";
+        shutdown(clientfd, SHUT_RDWR);//sys/socket.h
+        close(clientfd);//unistd.h
     }
 
     void Start(){
@@ -33,17 +34,16 @@ private:
 
     int net(){
         if(con.sock < 0){
-            perror("Failed to connect...\n");
+            std::cerr << "Failed to connect...\n";
             return -1;
         }
-        if(bind(con.sock, (struct sockaddr*)&con.address,
-                sizeof(con.address)) < 0){
-            perror("Failed to bind...\n");
+        if(bind(con.sock, (sockaddr*)&con.address, sizeof(con.address)) < 0){//socket.h
+            std::cerr << "Failed to bind...\n";
             return -1;
         }
 
-        if(listen(con.sock, con.backlog) < 0){
-            perror("Failed to listen...\n");
+        if(listen(con.sock, con.backlog) < 0){//socket.h
+            std::cerr << "Failed to listen...\n";
             return -1;
         }
 
@@ -53,19 +53,20 @@ private:
     int launch(){
         char buffer[B_MAX] = { 0 };
 
-        clientfd = accept(con.sock, 0, 0);
-        FILE* file = fopen(filepath.c_str(), "w");
-        if(file == NULL){
-            perror("CANT OPEN FILE\n");
+        clientfd = accept(con.sock, 0, 0);//socket.h
+
+
+        std::fstream file(filepath, std::ios::out);
+        if(!file){
+            std::cerr << "CANT OPEN FILE\n";
             close(clientfd);
             return -1;
         }
         while(recv(clientfd, buffer, B_MAX - 1, 0) != 0){
-            buffer[B_MAX - 1]  = 0;
-            fwrite(buffer, sizeof(char), std::strlen(buffer), file);
+            buffer[B_MAX - 1] = 0;
+            file.write(buffer, std::strlen(buffer)); //cstring
         }
 
-        fclose(file);
         close(clientfd);
 
         return 1;
@@ -84,18 +85,18 @@ private:
 
 int main(int argc, char** argv){
     if(argc < 2){
-        perror("No filepath given");
+        std::cerr << "No filepath given";
         return 1;
     }
     if(argc < 3){
-        perror("No port given\n");
+        std::cerr << "No port given\n";
         return 1;
     }
     char* filepath = argv[1];
-    int port = atoi(argv[2]);
+    int port = std::stoi(argv[2]);
 
     if(port < 0){
-        perror("Invalid port input\n");
+        std::cerr << "Invalid port input\n";
         return 1;
     }
 
