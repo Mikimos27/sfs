@@ -1,5 +1,4 @@
 #include "../hdr/connection.h"
-#include "../hdr/convinience.h"
 
 #include <cstdio>
 #include <cstring>
@@ -15,7 +14,7 @@
 #define PORT 15050
 //////////////////
 #define BLOG 10
-#define TIMEOUT 10///////////////////////////////////////////DO timeout
+#define TIMEOUT 10
 
 
 class Server{
@@ -36,13 +35,13 @@ public:
             std::cerr << "setsockopt failed\n";
             return;
         }
-        if(net() < 0) return;
         if(launch() < 0) return;
+        if(work() < 0) return;
     } 
 
 private:
 
-    int net(){
+    int launch(){
         if(con.sock < 0){
             std::cerr << "Failed to create socket\n";
             return -1;
@@ -57,17 +56,17 @@ private:
             return -1;
         }
 
-        return 1;
-    }
-
-    int launch(){
-        unsigned char buffer[B_MAX] = { 0 };
-
-        if((clientfd = accept(con.sock, 0, 0)) < 0){//socket.h
+        if((clientfd = accept(con.sock, 0, 0)) < 0){//socket.h //Here who can accept
             std::cerr << "Failed to accept connection\n";
             return -1;
         }
 
+        return 1;
+    }
+
+
+    int work(){
+        unsigned char buffer[B_MAX] = { 0 };
         std::FILE* file = std::fopen(filepath.c_str(), "wb");
         if(!file){
             std::cerr << "Can't open file\n";
@@ -76,7 +75,6 @@ private:
         size_t rec_s = 0;
         while((rec_s = recv(clientfd, buffer, B_MAX, 0)) > 0){
             std::fwrite(buffer, sizeof(unsigned char), rec_s, file);
-            zero_arr(buffer, B_MAX);
         }
         std::fclose(file);
 

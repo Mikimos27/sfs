@@ -1,5 +1,4 @@
 #include "../hdr/connection.h"
-#include "../hdr/convinience.h"
 
 #include <cstdio>
 #include <cstdlib>
@@ -32,23 +31,18 @@ public:
 
 
     void Start(){
-        if(net() < 0) return;
         if(launch() < 0) return;
-        if(manage() < 0) return;
+        if(work() < 0) return;
     }
 
 private:
-    int net(){
+    int launch(){
         if(inet_pton(con.domain, address.c_str(), &con.address.sin_addr) <= 0){
             std::cerr << "Bad address given\n";
             return -1;
         }
+
         con.interface = inet_addr(address.c_str());
-        return 1;
-    }
-
-
-    int launch(){
         if(connect(con.sock, (sockaddr*)&con.address, sizeof(con.address)) < 0){
             std::cerr << "Failed to connect to server\n";
             return -1;
@@ -57,7 +51,7 @@ private:
     }
 
 
-    int manage(){
+    int work(){
         unsigned char buffer[B_MAX] = { 0 };
 
         std::FILE* file = std::fopen(filepath.c_str(), "rb");
@@ -67,9 +61,8 @@ private:
         }
         size_t chars_read = 0;
 
-        while((chars_read = std::fread(buffer, sizeof(unsigned char), B_MAX, file)) > 0){
+        while(!std::feof(file) && (chars_read = std::fread(buffer, sizeof(unsigned char), B_MAX, file)) > 0){
             send(con.sock, buffer, chars_read, 0);
-            zero_arr(buffer, B_MAX);
             chars_read = 0;
         }
         std::fclose(file);
