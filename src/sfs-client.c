@@ -12,6 +12,7 @@
 #define TIMEOUT 1000
 
 void net(Connection* client, const char* addr){
+    printf("%s\n", addr);
     if(inet_pton(client->domain, addr, &client->address.sin_addr) <= 0){
         perror("Failed net connection...");
         exit(1);
@@ -43,10 +44,19 @@ void launch(Connection* client){
 }
 
 
-int main(){
+int main(int argc, char** argv){
+    if(argc < 2) {
+        printf("No address given");
+        exit(1);
+    }
+    if(strlen(argv[1]) > 15){
+        printf("Address too long");
+        exit(1);
+    }
+
     Connection client = con_init(AF_INET, SOCK_STREAM, 0, INADDR_ANY, PORT, 1, net, launch);
 
-    client.net(&client, "127.0.0.1");
+    client.net(&client, argv[1]);
     client.launch(&client);
 
     return 0;
