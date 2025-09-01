@@ -5,6 +5,7 @@
 #include <cstring>
 
 #include <unistd.h>
+#include <sys/time.h>
 
 #include <string>
 #include <iostream>
@@ -14,13 +15,13 @@
 #define PORT 15050
 //////////////////
 #define BLOG 10
-#define TIMEOUT 1000
+#define TIMEOUT 10///////////////////////////////////////////DO timeout
 
 
 class Server{
 public:
-    Server(int domain, int service, int protocol, unsigned long interface, int port, int backlog, std::string filepath)
-        :   con(domain, service, protocol, interface, port, backlog), filepath(filepath), clientfd(0) {}
+    Server(int domain, int service, int protocol, unsigned long interface, int port, int backlog, std::string filepath, int timeout)
+        :   con(domain, service, protocol, interface, port, backlog), filepath(filepath), clientfd(0), timeout(timeout) {}
     ~Server(){
         std::cout << "Server closed\n";
         shutdown(clientfd, SHUT_RDWR);//sys/socket.h
@@ -28,6 +29,13 @@ public:
     }
 
     void Start(){
+        timeval tout;
+        tout.tv_sec = timeout;
+        tout.tv_usec = 0;
+        if(setsockopt(con.sock, SOL_SOCKET, SO_RCVTIMEO, &tout, sizeof(tout))){
+            std::cerr << "setsockopt failed\n";
+            return;
+        }
         if(net() < 0) return;
         if(launch() < 0) return;
     } 
@@ -81,6 +89,7 @@ private:
     Connection con;
     std::string filepath;
     int clientfd;
+    int timeout;
 };
 
 
@@ -90,9 +99,10 @@ int main(int argc, char** argv){
     int c = 0;
     int port = 0;
     char* filepath = NULL;
+    int timeout = 0;
 
     opterr = 0;
-    while ((c = getopt (argc, argv, "f:p:")) != -1){
+    while ((c = getopt (argc, argv, "f:p:t:")) != -1){
         switch (c){
             case 'p':
                 try{
@@ -106,8 +116,16 @@ int main(int argc, char** argv){
             case 'f':
                 filepath = optarg;
                 break;
+            case 't':
+                try{
+                    timeout = std::stoi(optarg);
+                }catch(...){
+                    std::cerr << "Given timeout is NAN\n";
+                    return 1;
+                }
+                break;
             case '?':
-                if (optopt == 'p' || optopt == 'f')
+                if (optopt == 'p' || optopt == 'f' || optopt == 't')
                     std::cerr << "Option -" << optopt << " requires an argument.\n";
                 else if (isprint (optopt))
                     std::cerr << "Unknown option '-" << (char)optopt << "'.\n";
@@ -127,12 +145,16 @@ int main(int argc, char** argv){
         std::cerr << "Bad port\n";
         failed = 1;
     }
+    if(timeout <= 0){
+        std::cout << "No timeout given - using defaults\n";
+        timeout = TIMEOUT;
+    }
     if(failed == 1){
-        std::cerr << "Use: client.elf [-p port] [-f filepath]\n";
+        std::cerr << "Use: server.elf [-p port] [-f filepath] [-t timeout]\n";
         return 1;
     }
 
-    Server server(AF_INET, SOCK_STREAM, 0, INADDR_ANY, port, BLOG, filepath);
+    Server server(AF_INET, SOCK_STREAM, 0, INADDR_ANY, port, BLOG, filepath, timeout);
     server.Start();
 
     return 0;
