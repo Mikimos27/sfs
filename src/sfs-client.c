@@ -19,7 +19,7 @@ void net(Connection* client, const char* addr){
         perror("Failed net connection...");
         exit(1);
     }
-    client->interface = 0;
+    client->interface = inet_addr(addr);
 }
 
 void launch(Connection* client){
