@@ -1,0 +1,3 @@
+[submodule "encdec"]
+	path = encdec
+	url = https://github.com/Mikimos27/encdec.git
