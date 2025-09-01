@@ -7,7 +7,10 @@ all: server.elf client.elf
 connection.o: src/connection.cpp hdr/connection.h
 	$(CXX) $(CXXFLAGS) -c $<
 
-%.elf: src/%.cpp connection.o
+send.o: src/send.cpp hdr/send.h
+	$(CXX) $(CXXFLAGS) -c $<
+
+%.elf: src/%.cpp connection.o send.o
 	$(CXX) $(CXXFLAGS) -o $@ $^
 
 
