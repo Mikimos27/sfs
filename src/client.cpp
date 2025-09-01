@@ -87,6 +87,8 @@ private:
 
             chars_read = 0;
         }
+        pack.create_msg(PACKET_END, (unsigned char*)"\0", 1);
+        pack.send_packet(con.sock);
         std::fclose(file);
         return 1;
     }

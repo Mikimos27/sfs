@@ -77,16 +77,20 @@ private:
         while(!(failure = packet.recv_packet(clientfd))){
             auto msg = packet.get_msg();
             std::cout << "msglen = " << msg.size() << '\n';
+            if(packet.type == PACKET_END){
+                failure = 2;
+                break;
+            }
             if(msg.size() <= 0) {
                 std::cout << "NO MSG!\n";
+                failure = -2;
                 break;
             }
             std::fwrite(msg.data(), sizeof(unsigned char), msg.size(), file);
 
 
-            std::cout << "\ntype = " << (int)packet.type << "\n";
         }
-        if(failure != 1)
+        if(failure != 2)
             std::cout << "Failed with " << failure << '\n';
         else std::cout << "Success!\n";
         std::fclose(file);
