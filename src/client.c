@@ -38,7 +38,7 @@ void launch(Connection* client){
         poll(fds, 1, TIMEOUT);
 
         if(fds[0].revents & POLLIN){
-            read(0, buffer, B_MAX - 1);
+            read(0, buffer, B_MAX - 1); //TODO - close socket or make proper exit 
             send(client->socket, buffer, B_MAX - 1, 0);
         }
     }
