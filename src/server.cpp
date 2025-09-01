@@ -64,7 +64,8 @@ private:
         }
         while(recv(clientfd, buffer, B_MAX - 1, 0) != 0){
             buffer[B_MAX - 1] = 0;
-            file.write(buffer, std::strlen(buffer)); //cstring
+            file.write(buffer, B_MAX - 1); //cstring
+            zero_arr(buffer, B_MAX);
         }
 
         close(clientfd);

@@ -12,3 +12,9 @@ Dependencies:
  - base-devel
  - linux
  - ability to connect to a network
+
+
+ Problems:
+ =========
+ - no encryption implemented
+ - if file size isn't exacly right it will end in null termination characters until the count of characters reaches a multiple of 2999
