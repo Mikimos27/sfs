@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-Connection con_init(int domain, int service, int protocol, unsigned long interface, int port, int backlog, void (*net)(Connection*, const char*), void (*launch)(Connection*)){
+Connection con_init(int domain, int service, int protocol, unsigned long interface, int port, int backlog){
     
     Connection con;
     con.domain = domain;
@@ -18,9 +18,6 @@ Connection con_init(int domain, int service, int protocol, unsigned long interfa
     con.address.sin_addr.s_addr = htonl(interface);
 
     con.socket = socket(domain, service, protocol);
-
-    con.net = net;
-    con.launch = launch;
 
     return con;
 }

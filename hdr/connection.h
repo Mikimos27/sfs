@@ -16,10 +16,8 @@ typedef struct Connection{
 
     struct sockaddr_in address;
 
-    void (*net)(struct Connection*, const char*);
-    void (*launch)(struct Connection*);
 
 } Connection;
-Connection con_init(int, int, int, unsigned long, int, int, void (*)(Connection*, const char*), void (*)(Connection*));
+Connection con_init(int, int, int, unsigned long, int, int);
 
 #endif
