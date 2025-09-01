@@ -1,4 +1,5 @@
 #include "../hdr/connection.h"
+#include "../hdr/send.h"
 
 #include <cstdio>
 #include <cstdlib>
@@ -16,6 +17,7 @@
 #define BLOG 10
 #define TIMEOUT 1000
 #define MAX_ADDRLEN 15
+
 
 
 
@@ -52,6 +54,7 @@ private:
 
 
     int work(){
+        /*
         unsigned char buffer[B_MAX] = { 0 };
 
         std::FILE* file = std::fopen(filepath.c_str(), "rb");
@@ -66,7 +69,25 @@ private:
             chars_read = 0;
         }
         std::fclose(file);
+        */
 
+        unsigned char buffer[B_MAX] = { 0 };
+        data_packet pack(0x10);
+
+        std::FILE* file = std::fopen(filepath.c_str(), "rb");
+        if(file == NULL){
+            std::cerr << "BAD FILE PATH\n";
+            return -1;
+        }
+        size_t chars_read = 0;
+
+        while(!std::feof(file) && (chars_read = std::fread(buffer, sizeof(unsigned char), B_MAX, file)) > 0){
+            pack.create_msg(0x10, buffer, chars_read);
+            pack.send_packet(con.sock);
+
+            chars_read = 0;
+        }
+        std::fclose(file);
         return 1;
     }
 

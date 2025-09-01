@@ -1,4 +1,5 @@
 #include "../hdr/connection.h"
+#include "../hdr/send.h"
 
 #include <cstdio>
 #include <cstring>
@@ -66,16 +67,28 @@ private:
 
 
     int work(){
-        unsigned char buffer[B_MAX] = { 0 };
+        data_packet packet(0);
         std::FILE* file = std::fopen(filepath.c_str(), "wb");
         if(!file){
             std::cerr << "Can't open file\n";
             return -1;
         }
-        size_t rec_s = 0;
-        while((rec_s = recv(clientfd, buffer, B_MAX, 0)) > 0){
-            std::fwrite(buffer, sizeof(unsigned char), rec_s, file);
+        int failure = 0;
+        while(!(failure = packet.recv_packet(clientfd))){
+            auto msg = packet.get_msg();
+            std::cout << "msglen = " << msg.size() << '\n';
+            if(msg.size() <= 0) {
+                std::cout << "NO MSG!\n";
+                break;
+            }
+            std::fwrite(msg.data(), sizeof(unsigned char), msg.size(), file);
+
+
+            std::cout << "\ntype = " << (int)packet.type << "\n";
         }
+        if(failure != 1)
+            std::cout << "Failed with " << failure << '\n';
+        else std::cout << "Success!\n";
         std::fclose(file);
 
         return 1;
