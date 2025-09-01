@@ -19,6 +19,7 @@ public:
     Server(int domain, int service, int protocol, unsigned long interface, int port, int backlog, std::string filepath)
         :   con(domain, service, protocol, interface, port, backlog), filepath(filepath), clientfd(0) {}
     ~Server(){
+        printf("Server closed\n");
         shutdown(clientfd, SHUT_RDWR);
         close(clientfd);
     }
