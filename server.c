@@ -39,7 +39,7 @@ Server server_init(int domain, int service, int protocol, unsigned long interfac
     return server;
 }
 
-Server client_init(int domain, int service, int protocol, unsigned long interface, int port, int backlog, void (*net)(Server*), void (*launch)(Server*)){
+Server client_init(int domain, int service, int protocol, unsigned long interface, int port, int backlog, void (*net)(Server*, const char*), void (*launch)(Server*)){
 
     Server client;
     client.domain = domain;
