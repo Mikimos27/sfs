@@ -26,7 +26,7 @@ void net(Connection* client, const char* addr){
 
 void launch(Connection* client){
     if(connect(client->socket, (struct sockaddr*)&client->address, sizeof(client->address)) < 0){
-        perror("Failed to connect to server\nCheck if port number is correct and if server is running\n");
+        perror("Failed to connect to server\n");
         close(client->socket);
         exit(1);
     } 
