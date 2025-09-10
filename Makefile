@@ -1,5 +1,5 @@
 CXX=g++
-CXXFLAGS=-g -Wall -Werror -O2
+CXXFLAGS=-g -Wall -Werror -O2 -std=c++23 -lcrypto
 LIB_SRCS=$(wildcard encdec/src/*.cpp)
 LIB_OBJS=$(LIB_SRCS:.cpp=.o)
 
@@ -17,7 +17,7 @@ connection.o: src/connection.cpp hdr/connection.h
 send.o: src/send.cpp hdr/send.h hdr/version_defs.h $(LIB_OBJS)
 	$(CXX) $(CXXFLAGS) -c $< $(LIB_OBJS)
 
-%.elf: src/%.cpp connection.o send.o
+%.elf: src/%.cpp connection.o send.o $(LIB_OBJS)
 	$(CXX) $(CXXFLAGS) -o $@ $^
 
 
