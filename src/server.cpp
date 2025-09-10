@@ -194,7 +194,7 @@ int main(){
     pack.create_auth(key);
     pack.send_packet(0);
     printf("\n\n");
-    pack.create_msg("FUCKING HELL HAMMOND!!!!!!");
+    pack.create_msg("FOGGIN' 'ELL 'AMMOND!!!!!!");
     auto worked = *pack.get_data();
     std::cout << "Msg = ";
     for(msglen_t i = 0; i < worked.length(); i++) printf("%c", worked.get_msg()[i]);
