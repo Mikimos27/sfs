@@ -1,0 +1,9 @@
+Auth:
+0-1: version
+2-3: type(0x04)
+4-11: time(ms)
+12-15: msglen(key + sig = 32 + 64 = 96)
+16-47: key(32)
+48-111: sig(64)
+
+
