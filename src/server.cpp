@@ -1,5 +1,6 @@
 #include "../hdr/connection.h"
 #include "../hdr/send.h"
+#include "../hdr/crypto.h"
 
 #include <cstdio>
 #include <cstring>
@@ -66,6 +67,7 @@ private:
     }
 
 
+    /*
     int work(){
         data_packet packet(0);
         std::FILE* file = std::fopen(filepath.c_str(), "wb");
@@ -98,6 +100,14 @@ private:
         return 1;
     }
 
+*/
+    int work(){
+//        data_packet packet(10);
+//        Ed25519 key;
+//        if(key.gen_key_pair()) return -1;
+//        if(packet.create_self_auth(key)) return -2;
+        return 0;
+    }
 
 
 private:
@@ -109,6 +119,7 @@ private:
 
 
 
+/*
 
 int main(int argc, char** argv){
     int c = 0;
@@ -172,5 +183,21 @@ int main(int argc, char** argv){
     Server server(AF_INET, SOCK_STREAM, 0, INADDR_ANY, port, BLOG, filepath, timeout);
     server.Start();
 
+    return 0;
+}
+*/
+
+int main(){
+    data_packet pack;
+    Ed25519 key;
+    key.gen_key_pair();
+    pack.create_auth(key);
+    pack.send_packet(0);
+    printf("\n\n");
+    pack.create_msg("FUCKING HELL HAMMOND!!!!!!");
+    auto worked = *pack.get_data();
+    std::cout << "Msg = ";
+    for(msglen_t i = 0; i < worked.length(); i++) printf("%c", worked.get_msg()[i]);
+    printf("\nMsglen = %d\n", worked.length());
     return 0;
 }
