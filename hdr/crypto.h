@@ -5,5 +5,6 @@
 #include "../encdec/hdr/dh.h"
 #include "../encdec/hdr/ed25519.h"
 #include "../encdec/hdr/sha256.h"
+#include "../encdec/hdr/helper.h"
 
 #endif
