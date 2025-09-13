@@ -12,9 +12,6 @@
 #include <iostream>
 
 #define B_MAX 3000
-//Recomended port:
-#define PORT 15050
-//////////////////
 #define BLOG 10
 #define TIMEOUT 10
 
@@ -193,11 +190,13 @@ int main(){
     key.gen_key_pair();
     pack.create_auth(key);
     pack.send_packet(0);
-    printf("\n\n");
-    pack.create_msg("FOGGIN' 'ELL 'AMMOND!!!!!!");
+    printf("\nvalid = %s\n", pack.validate_packet(key) == 0 ? "YES" : "NO");
+    printf("\n");
+    pack.create_msg("HAMMOND, YOU SODDING TICTAC!!!");
     auto worked = *pack.get_data();
     std::cout << "Msg = ";
     for(msglen_t i = 0; i < worked.length(); i++) printf("%c", worked.get_msg()[i]);
     printf("\nMsglen = %d\n", worked.length());
+
     return 0;
 }

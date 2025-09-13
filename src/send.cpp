@@ -34,15 +34,15 @@ void print_hex(const unsigned char* str, size_t len){
     }
 }
 
-data_packet::packet_aggregate::packet_aggregate(version_t v, type_t ty, timems_t tms, msglen_t ml, unsigned char* msg)
+packet_aggregate::packet_aggregate(version_t v, type_t ty, timems_t tms, msglen_t ml, unsigned char* msg)
 : version(v), type(ty), timems(tms), msglen(ml), msg(msg) {}
-data_packet::packet_aggregate::packet_aggregate() : packet_aggregate(0, 0, 0, 0, nullptr) {}
-data_packet::packet_aggregate::packet_aggregate(const packet_aggregate& other)
+packet_aggregate::packet_aggregate() : packet_aggregate(0, 0, 0, 0, nullptr) {}
+packet_aggregate::packet_aggregate(const packet_aggregate& other)
 : version(other.version), type(other.type), timems(other.timems), msglen(other.msglen){
     msg = new unsigned char[msglen];
     memcpy(msg, other.msg, msglen);
 }
-data_packet::packet_aggregate::packet_aggregate(packet_aggregate&& other)
+packet_aggregate::packet_aggregate(packet_aggregate&& other)
 : version(other.version), type(other.type), timems(other.timems), msglen(other.msglen){
     msg = other.msg;
     other.msg = nullptr;
@@ -51,12 +51,12 @@ data_packet::packet_aggregate::packet_aggregate(packet_aggregate&& other)
     other.timems = 0;
     other.msglen = 0;
 }
-data_packet::packet_aggregate::~packet_aggregate(){
+packet_aggregate::~packet_aggregate(){
     if(msg != nullptr) delete[] msg;
     msg = nullptr;
 }
-const msglen_t data_packet::packet_aggregate::length() const { return msglen; }
-const unsigned char* const data_packet::packet_aggregate::get_msg() const { return msg; }
+const msglen_t packet_aggregate::length() const { return msglen; }
+const unsigned char* const packet_aggregate::get_msg() const { return msg; }
 
 
 
@@ -128,6 +128,13 @@ int data_packet::create_auth(Ed25519& key){
     return 0;
 }
 
+int data_packet::validate_packet(Ed25519& key){
+    type_t type = 0;
+    memcpy(&type, data + version_s, type_s);
+    if(ntohs(type) != PACKET_AUTH) return -1;
+    return key.verify(data, version_s + type_s + timems_s + msglen_s + ED25519_KEY,
+                      data + version_s + type_s + timems_s + msglen_s + ED25519_KEY, ED25519_SIG);
+}
 
 int data_packet::send_packet(int sockfd){
     version_t version = 0;
@@ -193,7 +200,42 @@ const unsigned char* const data_packet::get_data_raw() const {
     return data;
 }
 
-const std::expected<data_packet::packet_aggregate, const char*> data_packet::get_data() const{
+bool data_packet::check_version() const {
+    if(get_version() == VERSION) return true;
+    return false;
+}
+bool data_packet::check_type(type_t compared) const {
+    if(get_type() == compared) return true;
+    return false;
+}
+
+const version_t data_packet::get_version() const {
+    version_t ver = 0;
+    const unsigned char* dptr = data;
+    memcpy(&ver, dptr, version_s);
+    return ntohs(ver);
+}
+const type_t data_packet::get_type() const {
+    type_t type = 0;
+    const unsigned char* dptr = data + version_s;
+    memcpy(&type, dptr, type_s);
+    return ntohs(type);
+}
+const timems_t data_packet::get_time_ms() const {
+    timems_t timems = 0;
+    const unsigned char* dptr = data + version_s + type_s;
+    memcpy(&timems, dptr, timems_s);
+    return ntohll(timems);
+}
+const msglen_t data_packet::get_msglen() const {
+    msglen_t msglen = 0;
+    const unsigned char* dptr = data + version_s + type_s + timems_s;
+    memcpy(&msglen, dptr, msglen_s);
+    return ntohl(msglen);
+}
+
+
+const std::expected<packet_aggregate, const char*> data_packet::get_data() const{
     version_t ver = 0;
     type_t type = 0;
     timems_t timems = 0;
