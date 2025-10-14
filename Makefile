@@ -20,12 +20,14 @@ send.o: src/send.cpp hdr/send.h hdr/version_defs.h $(LIB_OBJS)
 %.elf: src/%.cpp connection.o send.o $(LIB_OBJS)
 	$(CXX) $(CXXFLAGS) -o $@ $^
 
+test: tests/test.cpp connection.o send.o $(LIB_OBJS)
+	$(CXX) $(CXXFLAGS) -o $@ $^
 
 
 .PHONY: clean remake
 
 clean:
-	rm *.o
+	rm -f *.o test server.elf client.elf
 	cd encdec/ && $(MAKE) clean
 	cd ..
 

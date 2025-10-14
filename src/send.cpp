@@ -136,6 +136,52 @@ int data_packet::validate_packet(Ed25519& key){
                       data + version_s + type_s + timems_s + msglen_s + ED25519_KEY, ED25519_SIG);
 }
 
+
+int data_packet::create_kex(DH_protocol& exch, Ed25519& sign){
+    sign.get_key_prv();
+    if(!is_zero(sign.get_out_buff(), sign.get_out_size())) {
+        printf("HERE\n\n");
+        return -1;
+    }
+
+    EVP_PKEY* temp = nullptr; // make extract_pub take evp_pkey&/!!!!!!!!!!!!!!!!!!!
+    if(exch.gen_key()) return -1;
+    if(exch.extract_pub(&temp)) return -1;
+    evp_pkey pub(&temp);
+
+    printf("size = %ld\n", pub.keylen());
+
+    version_t version = htons(VERSION);
+    type_t type = htons(PACKET_EXCH);
+    timems_t time = htonll(time_epoch_ms());
+    msglen_t msglen = htonl(X25519_KEY + ED25519_SIG);
+    unsigned char key_raw[X25519_KEY];
+
+    auto vec = EVP2RAW_pub(pub.key);
+    if(vec.size() != X25519_KEY) return -1;
+    for(size_t i = 0; i < X25519_KEY; i++) key_raw[i] = vec.at(i);
+
+    unsigned char* dptr = data;
+    memcpy(dptr, &version, version_s);
+    dptr += version_s;
+    memcpy(dptr, &type, type_s);
+    dptr += type_s;
+    memcpy(dptr, &time, timems_s);
+    dptr += timems_s;
+    memcpy(dptr, &msglen, msglen_s);
+    dptr += msglen_s;
+    memcpy(dptr, key_raw, X25519_KEY);
+    dptr += X25519_KEY;
+
+    if(sign.sign(data, dptr - data) || sign.get_out_size() != ED25519_SIG) return -1;
+
+
+    memcpy(dptr, sign.get_out_buff(), ED25519_SIG);
+
+    return 0;
+}
+
+
 int data_packet::send_packet(int sockfd){
     version_t version = 0;
     type_t type = 0;
@@ -167,6 +213,14 @@ int data_packet::send_packet(int sockfd){
         print_hex(dptr, ED25519_KEY);
         printf("\nsig = ");
         dptr += ED25519_KEY;
+        ///PROBLEM!!!!!!!!!!
+        print_hex(dptr, ED25519_SIG);
+    }
+    if(type == PACKET_EXCH) {
+        printf("key = ");
+        print_hex(dptr, X25519_KEY);
+        printf("\nsig = ");
+        dptr += X25519_KEY;
         print_hex(dptr, ED25519_SIG);
     }
     else{

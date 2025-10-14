@@ -54,8 +54,23 @@ private:
 
 
     int work(){
-
         /*
+        unsigned char buffer[B_MAX] = { 0 };
+
+        std::FILE* file = std::fopen(filepath.c_str(), "rb");
+        if(file == NULL){
+            std::cerr << "BAD FILE PATH\n";
+            return -1;
+        }
+        size_t chars_read = 0;
+
+        while(!std::feof(file) && (chars_read = std::fread(buffer, sizeof(unsigned char), B_MAX, file)) > 0){
+            send(con.sock, buffer, chars_read, 0);
+            chars_read = 0;
+        }
+        std::fclose(file);
+        */
+
         unsigned char buffer[B_MAX] = { 0 };
         data_packet pack(0x10);
 
@@ -75,7 +90,6 @@ private:
         pack.create_msg(PACKET_END, (unsigned char*)"\0", 1);
         pack.send_packet(con.sock);
         std::fclose(file);
-        */
         return 1;
     }
 

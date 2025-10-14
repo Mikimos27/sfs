@@ -12,6 +12,7 @@
 #define PACKET_MSG 0x02
 
 #define PACKET_AUTH 0x04
+#define PACKET_EXCH 0x05
 
 
 using version_t = uint16_t;
