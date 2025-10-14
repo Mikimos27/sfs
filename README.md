@@ -12,8 +12,9 @@ Dependencies:
  - base-devel
  - linux
  - ability to connect to a network
+ - openssl
 
 
  Problems:
  =========
- - no encryption implemented
+ - implementing encryption
